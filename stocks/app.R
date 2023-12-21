@@ -1,3 +1,4 @@
+
 library(shiny)
 library(shinyWidgets)
 library(shinythemes)
@@ -5,8 +6,9 @@ library(plotly)
 library(tidyverse)
 library(tidyquant)
 
-tickers <- c("^NSEI","RELIANCE.NS","TCS.NS","HDFCBANK.NS","ASIANPAINT.NS","TITAN.NS","BAJFINANCE.NS","ADANIENT.NS")
-benchmarks <- c("^NDX","^GSPC")
+tickers <- c("^NSEI","RELIANCE.NS","TCS.NS","HDFCBANK.NS",
+             "ASIANPAINT.NS","TITAN.NS","BAJFINANCE.NS","ADANIENT.NS")
+
 
 prices <- tq_get(tickers, 
                  get  = "stock.prices",
@@ -15,11 +17,6 @@ prices <- tq_get(tickers,
                  complete_cases = F) %>%
   select(symbol,date,close)
 
-bench <- tq_get(benchmarks,
-                get  = "stock.prices",
-                from = today()-months(12),
-                to   = today()) %>%
-  select(symbol,date,close)
 
 # -----------------------------------------------------
 # UI
@@ -68,9 +65,11 @@ ui <- fluidPage(#theme = shinytheme("cyborg"),
   )
 )
 
+
 # -----------------------------------------------------
 # SERVER
 #-------------------------------------------------------
+
 
 server <- function(input, output) {
   
@@ -101,7 +100,6 @@ server <- function(input, output) {
     
     
     # Create plot
-    View(prices)
     output$plot <- renderPlotly({
       print(
         ggplotly(prices %>%
@@ -111,8 +109,7 @@ server <- function(input, output) {
                    ungroup() %>%
                    ggplot(aes(date, value,colour = symbol)) +
                    geom_line(size = 1, alpha = .9) +
-                   # uncomment the line below to show area under curves
-                   #geom_area(aes(fill=symbol),position="identity",alpha=.2) +
+                   
                    theme_minimal(base_size=16) +
                    theme(axis.title=element_blank(),
                          plot.background = element_rect(fill = "black"),
@@ -122,8 +119,10 @@ server <- function(input, output) {
         )
       )
     })
+  })
+}
 
-# Run the application 
+
 shinyApp(ui = ui, server = server)
 
 
